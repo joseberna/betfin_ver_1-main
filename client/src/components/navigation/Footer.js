@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import Text from '../typography/Text';
 import ColoredText from '../typography/ColoredText';
+
  
 
 const StyledFooter = styled.footer`
