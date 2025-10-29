@@ -1,30 +1,35 @@
-import React from 'react'
-import GlobalState from './global/GlobalState'
-import { ThemeProvider } from 'styled-components'
-import ModalProvider from './modal/ModalProvider'
-import theme from '../styles/theme'
-import Normalize from '../styles/Normalize'
-import GlobalStyles from '../styles/Global'
-import { BrowserRouter } from 'react-router-dom'
-import WebSocketProvider from './websocket/WebsocketProvider'
-import GameState from './game/GameState'
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+
+import GlobalState from './global/GlobalState';
+import ModalProvider from './modal/ModalProvider';
+import WebSocketProvider from './websocket/WebsocketProvider';
+import GameState from './game/GameState';
+
+import  WalletProvider  from '../web3';
+import theme from '../styles/theme';
+import Normalize from '../styles/Normalize';
+import GlobalStyles from '../styles/Global';
 
 const Providers = ({ children }) => (
   <BrowserRouter>
     <ThemeProvider theme={theme}>
-      <GlobalState>
-        <ModalProvider>
-          <WebSocketProvider>
-            <GameState>
-              <Normalize />
-              <GlobalStyles />
-              {children}
-            </GameState>
-          </WebSocketProvider>
-        </ModalProvider>
-      </GlobalState>
+      <WalletProvider>                           
+        <GlobalState>
+          <ModalProvider>
+            <WebSocketProvider>
+              <GameState>
+                <Normalize />
+                <GlobalStyles />
+                {children}
+              </GameState>
+            </WebSocketProvider>
+          </ModalProvider>
+        </GlobalState>
+      </WalletProvider>
     </ThemeProvider>
   </BrowserRouter>
-)
+);
 
-export default Providers
+export default Providers;
