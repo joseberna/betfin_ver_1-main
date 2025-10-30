@@ -26,10 +26,10 @@ const WebSocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [socketId, setSocketId] = useState(null);
 
-  // guardamos instancia en ref para limpiar listeners correctamente
+  
   const socketRef = useRef(null);
 
-  // --- helpers de limpieza ---
+  
   const detachListeners = useCallback((s) => {
     if (!s) return;
     s.off("connect");
@@ -51,7 +51,7 @@ const WebSocketProvider = ({ children }) => {
     } catch (_) {}
 
     detachListeners(s);
-    // cerrar la conexión (no autoconnect)
+    
     s.disconnect();
     socketRef.current = null;
 
@@ -60,13 +60,12 @@ const WebSocketProvider = ({ children }) => {
     setPlayers(null);
     setTables(null);
 
-    // opcional: navegar fuera de áreas que dependan de socket
-    // navigate("/connect");
+    
   }, [detachListeners, setPlayers, setTables]);
 
-  // --- conexión (una sola vez) ---
+  
   useEffect(() => {
-    // crea instancia si no existe
+  
     if (!socketRef.current) {
       const s = io(config.socketURI, {
         path: "/socket.io",
@@ -79,7 +78,7 @@ const WebSocketProvider = ({ children }) => {
         timeout: 20000,
       });
 
-      // listeners base
+      
       s.on("connect", () => {
         console.log("🟢 WS connected:", s.id);
         setSocket(s);
@@ -103,7 +102,7 @@ const WebSocketProvider = ({ children }) => {
         console.log("🔴 WS disconnected:", reason);
       });
 
-      // eventos de juego
+      
       s.on(SC_RECEIVE_LOBBY_INFO, ({ tables, players, socketId: sid, amount }) => {
         
         setSocketId(sid || s.id);
@@ -125,12 +124,12 @@ const WebSocketProvider = ({ children }) => {
       socketRef.current = s;
     }
 
-    // cleanup al desmontar
+    
     return () => cleanUp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // opcional: exponer una acción para pedir lobby
+  
   const fetchLobby = useCallback(
     ({ walletAddress, gameId, username }) => {
       const s = socketRef.current;

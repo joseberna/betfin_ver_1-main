@@ -48,7 +48,7 @@ export function useUserNFTs(addressProp) {
 
   const tokenIds = useMemo(() => {
     if (!tokenIdsRes?.length) return []
-    // Cada item: { result, status }
+    
     return tokenIdsRes
       .map((r, i) => (r?.result != null ? r.result : null))
       .filter((x) => x != null)

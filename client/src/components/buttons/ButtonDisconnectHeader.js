@@ -13,8 +13,6 @@ export default function ButtonDisconnectHeader() {
       await purgeWalletState()
 
       navigate('/connect')
-
-      // Limpieza suave por si alguna extensión deja flags
       try {
         Object.keys(localStorage).forEach((k) => {
           if (/^wagmi\.|^wc@|walletconnect/i.test(k)) localStorage.removeItem(k)

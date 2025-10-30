@@ -6,10 +6,10 @@ function getMetaMaskProvider() {
   const eth = typeof window !== 'undefined' ? window.ethereum : undefined
   if (!eth) return undefined
 
-  // 1) Si el provider principal ya es MetaMask
+  
   if (eth.isMetaMask && typeof eth.request === 'function') return eth
 
-  // 2) Si hay múltiples providers (Trust, Rabby, MetaMask, etc.)
+  
   if (Array.isArray(eth.providers) && eth.providers.length) {
     const mm = eth.providers.find((p) => p?.isMetaMask && typeof p.request === 'function')
     if (mm) return mm

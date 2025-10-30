@@ -14,22 +14,22 @@ export default function DisconnectButton() {
 
   const onDisconnect = async () => {
     try {
-      // 1️⃣ Emit and close socket
+
       if (socket?.connected) {
         socket.emit('CS_DISCONNECT')
         socket.disconnect()
       }
 
-      // 2️⃣ Clear all contexts
+
       setSelectedTableId(null)
       setTables([])
       setPlayers([])
       resetGameState?.()
 
-      // 3️⃣ Disconnect wallet cleanly
+
       await disconnectAsync()
 
-      // 4️⃣ Hard navigation to ensure full remount
+
       window.location.href = '/'
     } catch (e) {
       console.error('disconnect error', e)
