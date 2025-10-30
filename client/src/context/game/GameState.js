@@ -25,7 +25,7 @@ const GameState = ({ children }) => {
     if (!socket) return
 
     const onTableUpdated = ({ table, message, handResult }) => {
-      console.log('[CLIENT] SC_TABLE_UPDATED', { message, handResult, tableHandOver: table?.handOver });
+      
 
       let next = table
       if (typeof table === 'string') {
@@ -57,11 +57,11 @@ const GameState = ({ children }) => {
       // flag de turno
       if (mySeat) setTurn(!!mySeat[1]?.turn)
       if (handResult?.messages?.length) {
-        console.log('[CLIENT] SHOWDOWN:', handResult.messages);
+       
         setLastResult(handResult);
       }
       if (typeof message === 'string' && message.includes('New hand started')) {
-        console.log('[CLIENT] Clearing result/messages on new hand');
+      
         setMessages([]);
         setLastResult(null);
       }
@@ -69,7 +69,7 @@ const GameState = ({ children }) => {
 
     const onTableJoined = ({ seatId }) => { if (seatId) setSeatId(seatId) }
     const onTableLeft = ({ tableId }) => {
-      console.log('[CLIENT] SC_TABLE_LEFT for table', tableId);
+    
       setCurrentTable(null);
       setMessages([]);
       setSeatId(null);
@@ -103,15 +103,10 @@ const GameState = ({ children }) => {
     }
   }, [turn, turnTimeout])
 
-  // API al resto de la app
+  
   const joinTable = (tableId) => socket?.emit(CS_JOIN_TABLE, tableId)
 
-  // const leaveTable = () => {
-  //   const id = tableRef.current?.id
-  //   console.log('[CLIENT] leaveTable called; tableId=', id);
-  //   if (id && socket) socket.emit(CS_LEAVE_TABLE, id)
-  //   navigate('/', { replace: true })           // <-- te saca de /play
-  // }
+
 
   const leaveTable = () => {
     const tableId = tableRef.current?.id
@@ -131,7 +126,7 @@ const GameState = ({ children }) => {
         messages,
         currentTable,
         seatId,
-        lastResult,      // <-- expuesto para UI (ganadores)
+        lastResult,     
         joinTable,
         leaveTable,
         fold,

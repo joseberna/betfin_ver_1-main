@@ -21,7 +21,7 @@ const useCookie = (cookieName, initialState) => {
   }
 
   const setCookie = (cookieValue, expirationDays) => {
-    console.log('This runs')
+
     const date = new Date()
     date.setTime(date.getTime() + expirationDays * 24 * 60 * 60 * 1000)
     document.cookie = `${cookieName}=${cookieValue};expires=${date.toUTCString()};path=/`

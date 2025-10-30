@@ -28,14 +28,13 @@ import './Seat.scss'
 export const Seat = ({ currentTable, seatNumber, sitDown }) => {
   const { chipsAmount } = useContext(globalContext)
   const { standUp, seatId, rebuy } = useContext(gameContext)
-   
+
 
   const seat = currentTable.seats[seatNumber]
   const maxBuyin = currentTable.limit
   const minBuyIn = currentTable.minBet * 2 * 10
 
   useEffect(() => {
-    console.log(currentTable, seatId, seatNumber, currentTable.seats[seatNumber])
     // eslint-disable-next-line
   }, [currentTable])
 
@@ -51,7 +50,7 @@ export const Seat = ({ currentTable, seatNumber, sitDown }) => {
     CS_CHECK: {
       text: 'Check',
       bgColor: '#48ff52'
-    },    
+    },
     CS_RAISE: {
       text: 'Raise',
       bgColor: '#179ddc'
@@ -131,14 +130,14 @@ export const Seat = ({ currentTable, seatNumber, sitDown }) => {
               top="-55px"
               left="-93px"
               origin="top left"
-              style={{ zIndex: '55' }}            
+              style={{ zIndex: '55' }}
             >
               <BigBlindButton />
             </PositionedUISlot>
           )}
 
           {currentTable.smallBlind === seatNumber && (
-            <PositionedUISlot            
+            <PositionedUISlot
               top="-55px"
               left="-93px"
               origin="top left"

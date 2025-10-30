@@ -7,15 +7,17 @@ import ModalProvider from './modal/ModalProvider';
 import WebSocketProvider from './websocket/WebsocketProvider';
 import GameState from './game/GameState';
 
-import  WalletProvider  from '../web3';
+
 import theme from '../styles/theme';
 import Normalize from '../styles/Normalize';
 import GlobalStyles from '../styles/Global';
+import  WalletProvider  from '../web3/WalletProvider'
 
 const Providers = ({ children }) => (
+
   <BrowserRouter>
     <ThemeProvider theme={theme}>
-      <WalletProvider>                           
+      <WalletProvider>
         <GlobalState>
           <ModalProvider>
             <WebSocketProvider>

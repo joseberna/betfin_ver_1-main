@@ -5,63 +5,9 @@ import socketContext from '../context/websocket/socketContext'
 import globalContext from '../context/global/globalContext'
 import gameContext from '../context/game/gameContext'
 import { CS_FETCH_LOBBY_INFO } from '../pokergame/actions'
-import DisconnectButton from '../components/buttons/DisconnectButton'
+import HeaderLobby from '../components/header/HeaderLobby'
+import TableCardLobby from '../components/cards/TableCardLobby'
 
-
-function Stat({ label, value }) {
-  return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
-      <div style={{ opacity: 0.65, fontSize: 12 }}>{label}</div>
-      <div style={{ fontWeight: 600 }}>{value}</div>
-    </div>
-  )
-}
-
-function TableCard({ table, onJoin }) {
-  const sb = table.smallBlind ?? table.limit / 40
-  const bb = table.bigBlind ?? (table.limit / 40) * 2
-  return (
-    <div
-      style={{
-        border: '1px solid rgba(255,255,255,.08)',
-        borderRadius: 16,
-        padding: 16,
-        display: 'grid',
-        gridTemplateColumns: '1fr auto',
-        gap: 12,
-        background: 'rgba(255,255,255,.03)',
-      }}
-    >
-      <div>
-        <div style={{ fontSize: 16, fontWeight: 700 }}>{table.name}</div>
-        <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
-          <Stat label="Players" value={`${table.currentNumberPlayers}/${table.maxPlayers}`} />
-          <Stat label="Blinds" value={`${sb} / ${bb}`} />
-          <Stat label="Buy-in" value={table.limit} />
-        </div>
-      </div>
-      <div style={{ alignSelf: 'center' }}>
-        <button
-          onClick={() => onJoin(table.id)}
-          style={{
-            padding: '10px 14px',
-            borderRadius: 12,
-            border: 'none',
-            background: '#20c997',
-            color: '#051b17',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: '0.2s all ease-in-out',
-          }}
-          onMouseOver={(e) => (e.target.style.background = '#1fb387')}
-          onMouseOut={(e) => (e.target.style.background = '#20c997')}
-        >
-          Join
-        </button>
-      </div>
-    </div>
-  )
-}
 
 export default function Lobby() {
   const navigate = useNavigate()
@@ -87,7 +33,6 @@ export default function Lobby() {
   }, [tables])
 
   const handleJoin = (tableId) => {
-    console.log('[lobby] joining table', tableId)
     setSelectedTableId(tableId)
     navigate('/play', { replace: true })
   }
@@ -98,6 +43,8 @@ export default function Lobby() {
     return [...tables].sort((a, b) => a.id - b.id)
   }, [tables])
 
+
+
   return (
     <div
       style={{
@@ -107,47 +54,7 @@ export default function Lobby() {
       }}
     >
       {/* Header */}
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '20px 24px',
-          borderBottom: '1px solid rgba(255,255,255,.06)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-          <div style={{ fontWeight: 800, letterSpacing: 0.3 }}>Bet Poker</div>
-          <div style={{ opacity: 0.6, fontSize: 12 }}>
-            {isConnected ? `Wallet: ${address?.slice(0, 6)}…${address?.slice(-4)}` : 'Not connected'}
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <Stat label="Players online" value={Array.isArray(players) ? players.length : 0} />
-
-          {/* Nuevo botón para ir a Profile */}
-          <button
-            onClick={() => navigate('/profile')}
-            style={{
-              padding: '10px 14px',
-              borderRadius: 10,
-              border: 'none',
-              background: '#3399ff',
-              color: '#fff',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: '0.2s all ease-in-out',
-            }}
-            onMouseOver={(e) => (e.target.style.background = '#2b84db')}
-            onMouseOut={(e) => (e.target.style.background = '#3399ff')}
-          >
-            Profile
-          </button>
-
-          {isConnected && <DisconnectButton />}
-        </div>
-      </header>
+      <HeaderLobby />
 
 
       {/* Contenido principal */}
@@ -162,7 +69,7 @@ export default function Lobby() {
 
         <div style={{ display: 'grid', gap: 14 }}>
           {sortedTables.map((t) => (
-            <TableCard key={t.id} table={t} onJoin={handleJoin} />
+            <TableCardLobby key={t.id} table={t} onJoin={handleJoin} />
           ))}
         </div>
       </main>

@@ -105,7 +105,7 @@ const WebSocketProvider = ({ children }) => {
 
       // eventos de juego
       s.on(SC_RECEIVE_LOBBY_INFO, ({ tables, players, socketId: sid, amount }) => {
-        console.log("SC_RECEIVE_LOBBY_INFO", { tables, players, sid, amount });
+        
         setSocketId(sid || s.id);
         setChipsAmount?.(amount);
         setTables?.(tables);
@@ -113,12 +113,12 @@ const WebSocketProvider = ({ children }) => {
       });
 
       s.on(SC_PLAYERS_UPDATED, (players) => {
-        console.log("SC_PLAYERS_UPDATED", players);
+        
         setPlayers?.(players);
       });
 
       s.on(SC_TABLES_UPDATED, (tables) => {
-        console.log("SC_TABLES_UPDATED", tables);
+        
         setTables?.(tables);
       });
 
@@ -135,7 +135,7 @@ const WebSocketProvider = ({ children }) => {
     ({ walletAddress, gameId, username }) => {
       const s = socketRef.current;
       if (!s || !s.connected) return;
-      console.log("➡️ CS_FETCH_LOBBY_INFO", { walletAddress, gameId, username, socketId: s.id });
+      
       s.emit(CS_FETCH_LOBBY_INFO, {
         walletAddress,
         socketId: s.id,
@@ -151,8 +151,8 @@ const WebSocketProvider = ({ children }) => {
       value={{
         socket,
         socketId,
-        cleanUp,     // para desconectar manualmente desde otras vistas
-        fetchLobby,  // helper para entrar al lobby
+        cleanUp,     
+        fetchLobby,  
       }}
     >
       {children}
