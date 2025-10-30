@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAccount, useDisconnect, useWalletClient } from 'wagmi'
-import { loadUserNFTs, mintNFT, getTxUrl, CONTRACT_ADDRESS } from '../services/nftService'
-import DisconnectButton from '../components/buttons/DisconnectButton'
+import { useAccount, useWalletClient } from 'wagmi'
+import { loadUserNFTs, mintNFT, getTxUrl } from '../services/nftService'
+import HeaderProfile from '../components/header/HeaderProfile'
+import TableNFT from '../components/tables/TableNFT'
+import { sepolia } from 'wagmi/chains'
 
 export default function Profile() {
   const { address, isConnected } = useAccount()
-  const { disconnect } = useDisconnect()
-  const { data: walletClient } = useWalletClient()
-  const navigate = useNavigate()
-
+  const { data: walletClient } = useWalletClient({ chainId: sepolia.id })
   const [nfts, setNfts] = useState([])
   const [form, setForm] = useState({ name: '', description: '', rarity: 10, tokenURI: '' })
   const [loading, setLoading] = useState(false)
@@ -19,20 +17,30 @@ export default function Profile() {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    console.log('[Profile] walletClient: ', walletClient)
+    if (!isConnected || !walletClient) {
+      setError('Conecta tu wallet (Sepolia) primero.');
+      return
+    }
+
+  }, [walletClient])
+
+  useEffect(() => {
+    console.log('[Profile] walletClient', walletClient)
     if (!isConnected || !address) return
-    ;(async () => {
-      try {
-        setError('')
-        setLoading(true)
-        const data = await loadUserNFTs(address)
-        setNfts(data)
-      } catch (err) {
-        console.error(err)
-        setError(err.message || 'Error loading NFTs')
-      } finally {
-        setLoading(false)
-      }
-    })()
+      ; (async () => {
+        try {
+          setError('')
+          setLoading(true)
+          const data = await loadUserNFTs(address)
+          setNfts(data)
+        } catch (err) {
+          console.error(err)
+          setError(err.message || 'Error loading NFTs')
+        } finally {
+          setLoading(false)
+        }
+      })()
   }, [address, isConnected])
 
   const handleMint = async (e) => {
@@ -65,11 +73,6 @@ export default function Profile() {
     }
   }
 
-  const handleDisconnect = () => {
-    disconnect()
-    setNfts([])
-    navigate('/', { replace: true })
-  }
 
   const renderTxBanner = () => {
     if (status === 'signing') return <p>✍️ Firma la transacción en tu wallet…</p>
@@ -109,47 +112,8 @@ export default function Profile() {
         paddingBottom: 40,
       }}
     >
-      {/* HEADER */}
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '20px 24px',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          background: 'rgba(0,0,0,0.4)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-          <h2 style={{ fontWeight: 800, letterSpacing: 1, margin: 0 }}>Bet Poker</h2>
-          <div style={{ opacity: 0.6, fontSize: 12 }}>
-            {isConnected ? `Wallet: ${address?.slice(0, 6)}…${address?.slice(-4)}` : 'Not connected'}
-          </div>
-        </div>
+      <HeaderProfile />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button
-            onClick={() => navigate('/lobby')}
-            style={{
-              padding: '8px 12px',
-              borderRadius: 8,
-              border: '1px solid #20c997',
-              background: 'transparent',
-              color: '#20c997',
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: '0.2s',
-            }}
-            onMouseOver={(e) => (e.target.style.background = '#20c99720')}
-            onMouseOut={(e) => (e.target.style.background = 'transparent')}
-          >
-            ← Back to Lobby
-          </button>
-          {isConnected && <DisconnectButton />}
-        </div>
-      </header>
-
-      {/* CONTENIDO PRINCIPAL */}
       <div
         style={{
           display: 'flex',
@@ -229,57 +193,9 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Columna derecha: NFTs */}
-        <div
-          style={{
-            flex: '1 1 400px',
-            maxHeight: 520,
-            overflowY: 'auto',
-            borderRadius: 12,
-            padding: 16,
-            border: '1px solid rgba(32,201,151,0.3)',
-            background: 'rgba(255,255,255,0.05)',
-            boxShadow: 'inset 0 0 10px #00ffcc20',
-          }}
-        >
-          <h2 style={{ color: '#20c997', textShadow: '0 0 10px #20c99780' }}>My NFTs</h2>
-          {loading ? (
-            <p>Cargando…</p>
-          ) : nfts.length === 0 ? (
-            <p style={{ color: '#999' }}>No NFTs yet.</p>
-          ) : (
-            nfts.map((n) => (
-              <div
-                key={n.tokenId}
-                style={{
-                  background: '#0f1917',
-                  border: '1px solid #20c99740',
-                  borderRadius: 10,
-                  padding: 12,
-                  marginBottom: 10,
-                  boxShadow: '0 0 10px #20c99720',
-                  transition: '0.2s',
-                }}
-                onMouseOver={(e) => (e.currentTarget.style.boxShadow = '0 0 15px #20c99760')}
-                onMouseOut={(e) => (e.currentTarget.style.boxShadow = '0 0 10px #20c99720')}
-              >
-                <strong style={{ color: '#20c997' }}>#{n.tokenId}</strong> —{' '}
-                <span>{n.name}</span> · rarity {n.rarity}
-                <div style={{ fontSize: 13, opacity: 0.7 }}>{n.description}</div>
-                {n.tokenURI && (
-                  <a
-                    href={n.tokenURI}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ color: '#39f', fontSize: 12 }}
-                  >
-                    View Metadata
-                  </a>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+
+        <TableNFT nfts={nfts} loading={loading} />
+
       </div>
     </div>
   )

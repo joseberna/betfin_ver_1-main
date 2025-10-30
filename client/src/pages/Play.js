@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useRef,useMemo, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Container from '../components/layout/Container'
-import Button from '../components/buttons/Button'
 import globalContext from '../context/global/globalContext'
 import gameContext from '../context/game/gameContext'
 import socketContext from '../context/websocket/socketContext'
@@ -19,19 +18,19 @@ import background from '../assets/img/background.png'
 import { useAccount } from 'wagmi'
 import { CS_FETCH_LOBBY_INFO, SC_RECEIVE_LOBBY_INFO } from '../pokergame/actions'
 import './Play.scss'
+import HeaderPlay from '../components/header/HeaderPlay'
 
 const Play = () => {
   const [winnerMessage, setWinnerMessage] = useState(null)
   const navigate = useNavigate()
   const { socket } = useContext(socketContext)
-  const { selectedTableId, setSelectedTableId } = useContext(globalContext)
+  const { selectedTableId } = useContext(globalContext)
 
   const {
     messages,
     currentTable,
     seatId,
-    joinTable,
-    leaveTable,
+    joinTable,    
     sitDown,
     standUp,
     fold,
@@ -44,11 +43,6 @@ const Play = () => {
   const [bet, setBet] = useState(0)
   const joinedRef = useRef(false)
 
-  const shortAddr = useMemo(
-      () => (address ? `${address.slice(0, 6)}…${address.slice(-4)}` : ''),
-      [address]
-    )
-
   useEffect(() => {
     if (!socket || !isConnected) return
     socket.emit(CS_FETCH_LOBBY_INFO, {
@@ -57,17 +51,17 @@ const Play = () => {
     })
   }, [socket, isConnected, address])
 
-  
+
   useEffect(() => {
     if (!isConnected) navigate('/', { replace: true })
   }, [isConnected, navigate])
 
-  
+
   useEffect(() => {
     if (selectedTableId == null) navigate('/lobby', { replace: true })
   }, [selectedTableId, navigate])
 
-  
+
   useEffect(() => {
     if (!socket || joinedRef.current || selectedTableId == null) return
 
@@ -97,7 +91,7 @@ const Play = () => {
     }
   }, [socket, joinTable, selectedTableId, address])
 
-  
+
   useEffect(() => {
     if (!currentTable) return
     const { callAmount, minBet, pot, minRaise } = currentTable
@@ -106,7 +100,7 @@ const Play = () => {
     else setBet(minBet)
   }, [currentTable])
 
-  
+
   useEffect(() => {
     if (currentTable?.winMessages?.length > 0) {
       const lastWin = currentTable.winMessages.at(-1)
@@ -116,13 +110,8 @@ const Play = () => {
     }
   }, [currentTable?.winMessages])
 
-  
-  const handleLeave = () => {
-    joinedRef.current = false
-    leaveTable()
-    setSelectedTableId(null)
-    navigate('/lobby', { replace: true })
-  }
+
+
 
   return (
     <>
@@ -139,28 +128,7 @@ const Play = () => {
         }}
         className="play-area"
       >
-
-        <header
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '20px 24px',
-            borderBottom: '1px solid rgba(255,255,255,.06)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-            <div style={{ fontWeight: 800, letterSpacing: 0.3 }}>Bet Poker</div>
-            <div style={{ opacity: 0.6, fontSize: 12 }}>
-              {isConnected ? `Wallet: ${shortAddr}` : 'Not connected'}
-            </div>
-            {currentTable && (
-              <PositionedUISlot top="2vh" left="1.5rem" scale="0.65" style={{ zIndex: 50 }}>
-                <Button small secondary onClick={handleLeave}>Leave</Button>
-              </PositionedUISlot>
-            )}
-          </div>          
-        </header>
+        <HeaderPlay />
 
         <PokerTableWrapper>
           <PokerTable />
@@ -230,14 +198,5 @@ const Play = () => {
   )
 }
 
-const btn = (type) => ({
-  padding: '8px 12px',
-  borderRadius: 8,
-  border: 'none',
-  background: type === 'primary' ? '#20c997' : '#444',
-  color: type === 'primary' ? '#051b17' : '#fff',
-  fontWeight: 700,
-  cursor: 'pointer',
-})
 
 export default Play

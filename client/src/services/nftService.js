@@ -1,8 +1,9 @@
 import { readContract, writeContract, waitForTransaction } from '@wagmi/core'
+import { sepolia } from 'wagmi/chains'
 import BetfinCollectible from '../abi/BetfinCollectible.json'
 import { wagmiConfig } from '../web3'
+import { getWalletClientSafe } from '../web3/getWalletClientSafe'
 
-// === CONFIGURACIÓN ===
 export const CONTRACT_ADDRESS = process.env.REACT_APP_NFT_ADDRESS
 export const NETWORK = 'sepolia'
 
@@ -11,67 +12,68 @@ export const getTxUrl = (hash) =>
     ? `https://sepolia.etherscan.io/tx/${hash}`
     : `https://etherscan.io/tx/${hash}`
 
-// === CARGAR NFTs DEL USUARIO ===
-export async function loadUserNFTs(address) {
-  if (!address) {
-    console.warn('⚠️ No wallet address provided to loadUserNFTs')
-    return []
-  }
 
-  if (!CONTRACT_ADDRESS) {
-    console.error('❌ Falta REACT_APP_NFT_ADDRESS en tu archivo .env')
-    return []
-  }
+const ABI = Array.isArray(BetfinCollectible)
+  ? BetfinCollectible
+  : BetfinCollectible.abi
+if (!ABI || ABI.length === 0) throw new Error('ABI inválido o vacío')
+
+
+export async function loadUserNFTs(address) {
+  if (!address) return []
+  if (!CONTRACT_ADDRESS) { console.error('Falta REACT_APP_NFT_ADDRESS'); return [] }
 
   try {
     console.log('📦 Cargando NFTs de', address)
+    console.log('[NFTService] ABI length', ABI?.length)
+    console.log('[NFTService] ABI', ABI)
+    console.log('[NFTService] wagmiConfig', wagmiConfig)
+    console.log('[NFTService] CONTRACT_ADDRESS', CONTRACT_ADDRESS)
 
-    const balance = await readContract({
-      ...wagmiConfig,
+    const balance = await readContract( {
       address: CONTRACT_ADDRESS,
-      abi: BetfinCollectible.abi,
+      abi: ABI,
       functionName: 'balanceOf',
       args: [address],
+      chainId: sepolia.id,
     })
+
+    console.log('[NFTService] balance', balance)
+
 
     const total = Number(balance || 0)
     console.log('🎯 Balance NFTs:', total)
-
     if (total === 0) return []
 
     const nfts = []
-
     for (let i = 0; i < total; i++) {
-      let tokenId, meta
-
       try {
-        tokenId = await readContract({
-          ...wagmiConfig,
+        const tokenId = await readContract( {
           address: CONTRACT_ADDRESS,
-          abi: BetfinCollectible.abi,
+          abi: ABI,
           functionName: 'tokenOfOwnerByIndex',
           args: [address, i],
+          chainId: sepolia.id,
         })
 
-        meta = await readContract({
-          ...wagmiConfig,
+        const meta = await readContract( {
           address: CONTRACT_ADDRESS,
-          abi: BetfinCollectible.abi,
+          abi: ABI,
           functionName: 'getMetadata',
           args: [tokenId],
+          chainId: sepolia.id,
         })
-      } catch (innerErr) {
-        console.warn(`⚠️ Error obteniendo NFT #${i}:`, innerErr)
-        continue
-      }
 
-      nfts.push({
-        tokenId: tokenId?.toString() || i.toString(),
-        name: meta?.name || 'Unnamed NFT',
-        description: meta?.description || '',
-        rarity: Number(meta?.rarity || 0),
-        tokenURI: meta?.tokenURI || '',
-      })
+        nfts.push({
+          tokenId: tokenId?.toString() ?? `${i}`,
+          name: meta?.name ?? 'Unnamed NFT',
+          description: meta?.description ?? '',
+          rarity: Number(meta?.rarity ?? 0),
+          tokenURI: meta?.tokenURI ?? '',
+        })
+      } catch (e) {
+        console.warn(`⚠️ Error NFT #${i}:`, e)
+      }
     }
 
     console.log('✅ NFTs cargados:', nfts.length)
@@ -82,55 +84,43 @@ export async function loadUserNFTs(address) {
   }
 }
 
-// === MINT NFT ===
-/**
- * Mint con reporting de estado.
- * onStatus(status, payload):
- *  - 'signing'   (mostramos “firma en wallet”)
- *  - 'submitted' ({ hash })
- *  - 'confirmed' ({ receipt })
- *  - 'failed'    ({ error })
- */
-export async function mintNFT(address, form, onStatus = () => {}) {
+export async function mintNFT(address, form, onStatus = () => { }) {
   if (!address) throw new Error('Wallet address required')
-  if (!CONTRACT_ADDRESS) throw new Error('Missing contract address')
+  if (!CONTRACT_ADDRESS) throw new Error('Missing CONTRACT_ADDRESS')
 
-  const rarity = Math.max(1, Math.min(100, Number(form.rarity || 1)))
+  const rarity = Math.max(1, Math.min(100, Number(form?.rarity ?? 1)))
+  onStatus('signing')
 
   try {
-    onStatus('signing')
+    // Garantiza que la wallet esté lista (Sepolia), sin forzar switch
+    await getWalletClientSafe(wagmiConfig)
 
-    const tx = await writeContract({
-      ...wagmiConfig,
+    const tx = await writeContract( {
       address: CONTRACT_ADDRESS,
-      abi: BetfinCollectible.abi,
+      abi: ABI,
       functionName: 'safeMint',
-      args: [
-        form.name || 'Unnamed',
-        form.description || '',
-        rarity,
-        form.tokenURI || '',
-      ],
+      args: [form.name, form.description || '', rarity, form.tokenURI || ''],
       account: address,
+      chainId: sepolia.id,
     })
 
     onStatus('submitted', { hash: tx.hash })
 
-    const receipt = await waitForTransaction({
-      ...wagmiConfig,
+    const receipt = await waitForTransaction( {
       hash: tx.hash,
+      chainId: sepolia.id,
     })
 
     if (receipt.status === 'success' || receipt.status === 1) {
       onStatus('confirmed', { receipt })
       return receipt
     }
-
-    const error = new Error('Transaction failed')
-    onStatus('failed', { error })
-    throw error
+    throw new Error('Transaction failed')
   } catch (err) {
-    console.error('❌ Error al mintear NFT:', err)
+    if (err?.name === 'ChainMismatchError') {
+      err.message = 'Tu wallet no está en Sepolia. Cambia a Sepolia en la wallet y vuelve a intentar.'
+    }
+    console.error('❌ Mint error:', err)
     onStatus('failed', { error: err })
     throw err
   }

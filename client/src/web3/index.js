@@ -5,21 +5,14 @@ import {
   darkTheme,
   connectorsForWallets,
 } from '@rainbow-me/rainbowkit'
-import {
-  WagmiConfig,
-  configureChains,
-  createConfig,
-} from 'wagmi'
-import { mainnet, sepolia } from 'wagmi/chains'
+import { WagmiConfig, configureChains, createConfig } from 'wagmi'
+import { sepolia } from 'wagmi/chains'
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import { publicProvider } from 'wagmi/providers/public'
-import {
-  metaMaskWallet,
-  walletConnectWallet,
-} from '@rainbow-me/rainbowkit/wallets'
+import { metaMaskWallet } from '@rainbow-me/rainbowkit/wallets'
 
-// ===== CHAINS (solo Sepolia) =====
-export const { chains, publicClient, webSocketPublicClient } = configureChains(
+// --- Chains (solo Sepolia) ---
+const { chains, publicClient, webSocketPublicClient } = configureChains(
   [sepolia],
   [
     jsonRpcProvider({
@@ -32,14 +25,7 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
   ],
 )
 
-// ---------- WALLETCONNECT PROJECT ID ----------
-const WC_PROJECT_ID = process.env.REACT_APP_WC_PROJECT_ID
-
-if (!WC_PROJECT_ID && process.env.NODE_ENV !== 'production') {
-  console.warn('[wallet] Falta REACT_APP_WC_PROJECT_ID en tu .env')
-}
-
-// ---------- CONNECTORS ----------
+// --- Conectores (SOLO MetaMask) ---
 const connectors = connectorsForWallets([
   {
     groupName: 'Recommended',
@@ -47,17 +33,12 @@ const connectors = connectorsForWallets([
       metaMaskWallet({
         chains,
         shimDisconnect: true,
-        projectId: WC_PROJECT_ID,
-      }),
-      walletConnectWallet({
-        chains,
-        projectId: WC_PROJECT_ID,
+        projectId: process.env.REACT_APP_WC_PROJECT_ID,
       }),
     ],
   },
 ])
 
-// ---------- CONFIG ----------
 export const wagmiConfig = createConfig({
   autoConnect: false,
   connectors,
@@ -65,15 +46,14 @@ export const wagmiConfig = createConfig({
   webSocketPublicClient,
 })
 
-// ---------- PROVIDER ----------
-export function WalletProvider({ children }) {
+export default function WalletProvider({ children }) {
   return (
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider
         chains={chains}
         theme={darkTheme()}
-        modalSize="compact"
         initialChain={sepolia}
+        modalSize="compact"
         appInfo={{ appName: 'Bet Poker' }}
       >
         {children}
@@ -81,5 +61,3 @@ export function WalletProvider({ children }) {
     </WagmiConfig>
   )
 }
-
-export default WalletProvider

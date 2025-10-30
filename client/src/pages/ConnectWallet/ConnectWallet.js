@@ -53,7 +53,7 @@ export default function ConnectWallet() {
     }
   }
 
-  // Cargar info de lobby (NO navegamos a /play aquí)
+
   useEffect(() => {
     if (!isConnected || !address || !socket) return
       ; (async () => {
@@ -71,12 +71,6 @@ export default function ConnectWallet() {
         return () => socket.off?.('connect', emit)
       })()
   }, [isConnected, address, socket, params.gameId, params.username, setWalletAddress])
-  console.log({
-    RainbowKitLoaded: typeof ConnectButton,
-    isConnected,
-    address,
-    socketConnected: socket?.connected,
-  });
 
   return (
     <div style={{ display: 'grid', placeItems: 'center', minHeight: '60vh' }}>
