@@ -44,28 +44,19 @@ export function HeaderConnectWallet() {
     }
   }, [isConnected, navigate])
 
-
-
   useEffect(() => {
-    // marcamos interfaz lista cuando ya resolvimos conectores
     setReady(Boolean(metamaskConnector))
   }, [metamaskConnector])
 
   const handleConnect = async () => {
-    console.log('Conectando con metamaskConnector:', metamaskConnector)
-    // connect({ connector })
-    // Garantizamos elegir el provider correcto de MetaMask
     const mmProvider = getMetaMaskProvider()
     if (!mmProvider) {
       alert('MetaMask no está instalada. Instálala desde https://metamask.io/')
       return
     }
 
-    // ⚠️ Fuerza a que wagmi use el provider de MetaMask
-    // (cuando hay múltiples extensiones que "pelean" por window.ethereum)
     try {
       window.ethereum = mmProvider
-      // algunos navegadores respetan también globalThis
       if (typeof globalThis !== 'undefined') globalThis.ethereum = mmProvider
     } catch (_) { }
 
@@ -81,7 +72,6 @@ export function HeaderConnectWallet() {
   const handleDisconnect = async () => {
     try {
       await disconnect()
-      // Limpieza suave por si alguna extensión deja flags
       try {
         Object.keys(localStorage).forEach((k) => {
           if (/^wagmi\.|^wc@|walletconnect/i.test(k)) localStorage.removeItem(k)

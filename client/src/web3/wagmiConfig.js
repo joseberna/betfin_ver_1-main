@@ -1,4 +1,4 @@
-// client/src/web3/wagmiConfig.js
+
 import { createConfig, http, createStorage, cookieStorage } from 'wagmi'
 import { sepolia } from 'wagmi/chains'
 import { injected } from 'wagmi/connectors'

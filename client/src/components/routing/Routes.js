@@ -12,9 +12,6 @@ const Protected = ({ children }) => {
   return isConnected ? children : <Navigate to="/" replace />
 }
 
-console.log('[Routes] Protected:', Protected)
-
-
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Navigate to="/connect" replace />} />
