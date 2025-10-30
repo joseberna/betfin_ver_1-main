@@ -17,7 +17,6 @@ export default function Profile() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    console.log('[Profile] walletClient: ', walletClient)
     if (!isConnected || !walletClient) {
       setError('Conecta tu wallet (Sepolia) primero.');
       return
@@ -26,7 +25,7 @@ export default function Profile() {
   }, [walletClient])
 
   useEffect(() => {
-    console.log('[Profile] walletClient', walletClient)
+
     if (!isConnected || !address) return
       ; (async () => {
         try {

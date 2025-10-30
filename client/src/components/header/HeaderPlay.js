@@ -24,8 +24,7 @@ const HeaderPlay = ({ }) => {
         leaveTable()
         setSelectedTableId(null)
         navigate('/lobby', { replace: true })
-    }
-    console.log('Rendering HeaderPlay, currentTable:', currentTable)
+    }    
 
     return (
         <header

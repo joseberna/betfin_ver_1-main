@@ -7,7 +7,7 @@ const config = require('../config');
 
 const router = express.Router();
 
-// almacén simple de nonces en memoria (prod => redis/db)
+
 const nonces = new Map();
 
 router.get('/nonce', (req, res) => {
@@ -22,7 +22,7 @@ router.post('/verify', express.json(), async (req, res) => {
     const siweMessage = new SiweMessage(message);
     const fields = await siweMessage.verify({ signature });
 
-    // Validaciones mínimas
+
     if (fields.data.domain !== config.APP_DOMAIN) {
       return res.status(400).json({ ok: false, error: 'Invalid domain' });
     }

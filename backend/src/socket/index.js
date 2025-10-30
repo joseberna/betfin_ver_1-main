@@ -85,12 +85,7 @@ function broadcastToTable(io, table, message = null) {
   const handResult = buildHandResult(table)
   for (const p of table.players) {
     const snapshot = hideOpponentCards(table, p.socketId)
-    console.log('[SC_TABLE_UPDATED] to:', p.socketId, {
-      message,
-      handOver: table.handOver,
-      wentToShowdown: table.wentToShowdown,
-      handResult,
-    });
+
     io.to(p.socketId).emit(SC_TABLE_UPDATED, { table: snapshot, message, handResult })
   }
 }
@@ -119,7 +114,7 @@ function initNewHand(io, table) {
   if (!canStart) return
   table.clearWinMessages()
   table.startHand()
-  console.log('[NEW_HAND] started; broadcasting banner');
+
   broadcastToTable(io, table, '--- New hand started ---')
   scheduleBotTurn(io, table, 700)
 }
@@ -127,11 +122,11 @@ function initNewHand(io, table) {
 // -------------------------------------------------------------------
 
 module.exports.init = (socket, io) => {
-  console.log(`[SOCKET] Connected ${socket.id}`)
+
 
   // --- LOBBY INFO ---
   socket.on(CS_FETCH_LOBBY_INFO, ({ walletAddress, username }) => {
-    console.log(`[SOCKET] CS_FETCH_LOBBY_INFO ${walletAddress} -- ${username}`)
+
 
     const addr = socket.user?.address || walletAddress || `guest_${socket.id.slice(0, 4)}`
     const displayName = username || `player_${addr.slice(2, 6)}`
@@ -149,7 +144,7 @@ module.exports.init = (socket, io) => {
 
   // --- JOIN TABLE ---
   socket.on(CS_JOIN_TABLE, (tableId) => {
-    console.log(`[SOCKET] CS_JOIN_TABLE ${tableId} `)
+
 
     const table = tables[tableId]
     if (!table) return
@@ -193,7 +188,6 @@ module.exports.init = (socket, io) => {
 
   // --- LEAVE TABLE ---
   socket.on(CS_LEAVE_TABLE, (tableId) => {
-    console.log(`[SOCKET] CS_LEAVE_TABLE ${tableId} `)
 
     const table = tables[tableId]
     const player = players[socket.id]
@@ -217,7 +211,7 @@ module.exports.init = (socket, io) => {
 
   // --- REBUY / STAND UP (básico) ---
   socket.on(CS_REBUY, ({ tableId, seatId, amount }) => {
-    console.log(`[SOCKET] CS_REBUY ${tableId} `)
+
 
     const table = tables[tableId]
     const player = players[socket.id]
@@ -228,7 +222,7 @@ module.exports.init = (socket, io) => {
   })
 
   socket.on(CS_STAND_UP, (tableId) => {
-    console.log(`[SOCKET] CS_STAND_UP ${tableId} `)
+
 
     const table = tables[tableId]
     const player = players[socket.id]
@@ -251,8 +245,7 @@ module.exports.init = (socket, io) => {
     broadcastToTable(io, table, res.message)
     table.changeTurn(res.seatId)
     broadcastToTable(io, table)
-    if (table.handOver) {
-      // Mostramos ganador (ya se envió en broadcastToTable de arriba)
+    if (table.handOver) {      
       setTimeout(() => initNewHand(io, table), SHOWDOWN_PAUSE_MS);
     } else {
       scheduleBotTurn(io, table);
@@ -264,8 +257,6 @@ module.exports.init = (socket, io) => {
   socket.on(CS_CALL, (id) => handleAction(id, 'handleCall'))
   socket.on(CS_RAISE, ({ tableId, amount }) => handleAction(tableId, 'handleRaise', amount))
   socket.on(CS_DISCONNECT, () => {
-    console.log(`[SOCKET] CS_DISCONNECT ${tableId} `)
-
     try {
       Object.values(tables).forEach((t) => t.removePlayer(socket.id))
       delete players[socket.id]

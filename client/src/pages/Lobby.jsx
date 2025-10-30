@@ -20,6 +20,7 @@ export default function Lobby() {
 
 
   useEffect(() => {
+    console.log('[Lobby] isConnected:', isConnected)
     if (!socket) return
     setLoading(true)
     socket.emit(CS_FETCH_LOBBY_INFO, {
@@ -33,7 +34,6 @@ export default function Lobby() {
   }, [tables])
 
   const handleJoin = (tableId) => {
-    console.log('[lobby] joining table', tableId)
     setSelectedTableId(tableId)
     navigate('/play', { replace: true })
   }

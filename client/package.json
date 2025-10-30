@@ -27,8 +27,8 @@
         "socket.io-client": "^4.7.5",
         "styled-components": "^5.1.1",
         "sweetalert2": "^11.4.8",
-        "viem": "^1.21.4",
-        "wagmi": "^1.4.13",
+        "viem": "2.x",
+        "wagmi": "^2.14.8",
         "zustand": "^4.0.0-rc.0"
     },
     "scripts": {
@@ -38,7 +38,10 @@
         "eject": "react-scripts eject"
     },
     "eslintConfig": {
-        "extends": "react-app"
+        "extends": "react-app",
+        "globals": {
+            "globalThis": "readonly"
+        }
     },
     "browserslist": {
         "production": [

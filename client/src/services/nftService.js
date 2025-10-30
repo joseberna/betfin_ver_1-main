@@ -1,7 +1,7 @@
 import { readContract, writeContract, waitForTransaction } from '@wagmi/core'
 import { sepolia } from 'wagmi/chains'
 import BetfinCollectible from '../abi/BetfinCollectible.json'
-import { wagmiConfig } from '../web3'
+import { wagmiConfig } from '../web3/wagmiConfig'
 import { getWalletClientSafe } from '../web3/getWalletClientSafe'
 
 export const CONTRACT_ADDRESS = process.env.REACT_APP_NFT_ADDRESS
@@ -25,20 +25,15 @@ export async function loadUserNFTs(address) {
 
   try {
     console.log('📦 Cargando NFTs de', address)
-    console.log('[NFTService] ABI length', ABI?.length)
-    console.log('[NFTService] ABI', ABI)
-    console.log('[NFTService] wagmiConfig', wagmiConfig)
-    console.log('[NFTService] CONTRACT_ADDRESS', CONTRACT_ADDRESS)
 
-    const balance = await readContract( {
+
+    const balance = await readContract({
       address: CONTRACT_ADDRESS,
       abi: ABI,
       functionName: 'balanceOf',
       args: [address],
       chainId: sepolia.id,
     })
-
-    console.log('[NFTService] balance', balance)
 
 
     const total = Number(balance || 0)
@@ -48,7 +43,7 @@ export async function loadUserNFTs(address) {
     const nfts = []
     for (let i = 0; i < total; i++) {
       try {
-        const tokenId = await readContract( {
+        const tokenId = await readContract({
           address: CONTRACT_ADDRESS,
           abi: ABI,
           functionName: 'tokenOfOwnerByIndex',
@@ -56,7 +51,7 @@ export async function loadUserNFTs(address) {
           chainId: sepolia.id,
         })
 
-        const meta = await readContract( {
+        const meta = await readContract({
           address: CONTRACT_ADDRESS,
           abi: ABI,
           functionName: 'getMetadata',
@@ -93,9 +88,9 @@ export async function mintNFT(address, form, onStatus = () => { }) {
 
   try {
     // Garantiza que la wallet esté lista (Sepolia), sin forzar switch
-    await getWalletClientSafe(wagmiConfig)
+    // await getWalletClientSafe(wagmiConfig)
 
-    const tx = await writeContract( {
+    const tx = await writeContract({
       address: CONTRACT_ADDRESS,
       abi: ABI,
       functionName: 'safeMint',
@@ -106,7 +101,7 @@ export async function mintNFT(address, form, onStatus = () => { }) {
 
     onStatus('submitted', { hash: tx.hash })
 
-    const receipt = await waitForTransaction( {
+    const receipt = await waitForTransaction({
       hash: tx.hash,
       chainId: sepolia.id,
     })
