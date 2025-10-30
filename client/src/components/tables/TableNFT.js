@@ -22,9 +22,9 @@ const TableNFT = ({ nfts, loading }) => {
             ) : nfts.length === 0 ? (
                 <p style={{ color: '#999' }}>No NFTs yet.</p>
             ) : (
-                nfts.map((n) => (
-                    <div
-                        key={n.tokenId}
+                nfts.map((n, index) => (
+                    <div                        
+                        key={index}
                         style={{
                             background: '#0f1917',
                             border: '1px solid #20c99740',
