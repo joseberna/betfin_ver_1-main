@@ -1,7 +1,6 @@
 // client/src/pages/Profile.jsx
 import React, { useState } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { sepolia } from 'wagmi/chains'
 import HeaderProfile from '../components/header/HeaderProfile'
 import TableNFT from '../components/tables/TableNFT'
 import { useUserNFTs } from '../hooks/useUserNFTs' 
@@ -17,19 +16,20 @@ export default function Profile() {
   const [status, setStatus] = useState('idle')
   const [txHash, setTxHash] = useState('')
   const [localError, setLocalError] = useState('')
+  const SEPOLIA_CHAIN_ID = 11155111
 
   // --- mint (wagmi v2 hooks) ---
   const { writeContractAsync, isPending: isSigning } = useWriteContract()
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash || undefined,
-    chainId: sepolia.id,
+    chainId: SEPOLIA_CHAIN_ID,
   })
 
   const handleMint = async (e) => {
     e.preventDefault()
     setLocalError('')
     if (!isConnected) return setLocalError('Conecta tu wallet primero.')
-    if (chain?.id !== sepolia.id) return setLocalError('Cambia a Sepolia en la wallet.')
+    if (chain?.id !== SEPOLIA_CHAIN_ID) return setLocalError('Cambia a Sepolia en la wallet.')
 
     try {
       setStatus('signing')
@@ -39,7 +39,7 @@ export default function Profile() {
         functionName: 'safeMint',
         args: [form.name, form.description || '', Math.max(1, Math.min(100, Number(form.rarity || 1))), form.tokenURI || ''],
         account: address,
-        chainId: sepolia.id,
+        chainId: SEPOLIA_CHAIN_ID,
       })
       setTxHash(hash)
       setStatus('submitted')
